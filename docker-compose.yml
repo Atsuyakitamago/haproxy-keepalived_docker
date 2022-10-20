@@ -1,0 +1,35 @@
+# 3.8はDockerリリース19.03.0+ で対応している
+version: "3.8"
+
+services:
+
+  keepalived:
+    image: osixia/keepalived
+    build:
+      context: ./keepalived
+      dockerfile: Dockerfile
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+      - NET_RAW    
+    # VIP を扱うため
+    network_mode: host
+
+  haproxy:
+    image: haproxy
+    build: 
+      context: ./haproxy
+      dockerfile: Dockerfile
+    # portforward    (  host_port -  haproxy-container_port   )
+    ports:
+      - "8080:80"
+    networks:
+      haproxy_net:
+        ipv4_address: 172.20.0.2      
+      
+networks:
+  haproxy_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.20.0.0/24"
